@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GPOD Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <style>
+    body { background: linear-gradient(135deg, #000, #333); }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+    }
+    .hover-glow:hover {
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+    .input-monochrome {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    select.input-monochrome {
+      appearance: none;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      background-size: 1.25rem;
+      padding-right: 2.5rem;
+    }
+    select.input-monochrome option {
+      background-color: #1f1f1f;
+      color: white;
+    }
+    select.input-monochrome:focus {
+      outline: none;
+      border-color: white;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+    .snackbar {
+      visibility: hidden;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+    }
+    .snackbar.show {
+      visibility: visible;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+    @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+    @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+    .click-effect {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(0, 255, 0, 0.5);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: clickRipple 0.6s ease-out;
+    }
+    @keyframes clickRipple {
+      from { opacity: 1; transform: translate(-50%, -50%) scale(0); }
+      to { opacity: 0; transform: translate(-50%, -50%) scale(2); }
+    }
+    #previewImage {
+      max-width: 100%;
+      max-height: 400px;
+      display: none;
+      object-fit: contain;
+      cursor: pointer;
+    }
+    #matrixCanvas {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1000;
+    }
+    .success-text {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2em;
+      font-family: monospace;
+      color: #0f0;
+      z-index: 1001;
+      text-shadow: 0 0 10px #0f0;
+    }
+    .admin-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .admin-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-white">
+
+  <a href="/admin" id="adminLink" class="admin-link hover-glow hidden">Admin Panel</a>
+
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8 text-center">GPOD Authentication</h1>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <!-- Login Form -->
+      <div class="glass-panel rounded-lg p-8">
+        <form id="loginForm" class="space-y-6">
+          <div>
+            <label for="username" class="block mb-2">Username</label>
+            <input type="text" id="username" required class="input-monochrome w-full px-4 py-2 rounded"/>
+          </div>
+          <div>
+            <label for="backgroundType" class="block mb-2">Background Type</label>
+            <select id="backgroundType" required class="input-monochrome w-full px-4 py-2 rounded">
+              <option value="">Select background</option>
+              <option value="indoor">Indoor</option>
+              <option value="mountain">Mountain</option>
+              <option value="outdoor">Outdoor</option>
+              <option value="sea_cliff">Sea Cliff</option>
+            </select>
+          </div>
+          <div class="flex justify-between">
+            <button type="button" onclick="location.href='/register'" class="hover-glow border border-white/30 px-4 py-2 rounded">Register</button>
+            <button type="submit" class="hover-glow bg-white text-black px-4 py-2 rounded">Login</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Preview Panel -->
+      <div class="glass-panel rounded-lg p-8 flex flex-col">
+        <p class="mb-4">Click on objects to authenticate</p>
+        <div class="bg-black/30 rounded-lg flex justify-center items-center min-h-[400px]">
+          <p id="previewPlaceholder" class="text-white/50">Preview will appear here</p>
+          <img id="previewImage" alt="Preview"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extra UI Elements -->
+  <div id="snackbar" class="snackbar"></div>
+  <canvas id="matrixCanvas"></canvas>
+  <div id="successText" class="success-text">Access Granted</div>
+
+  <!-- JavaScript -->
+  <script>
+    let objectPositions = [], clickCounts = {}, registeredObjects = [], loginTimer;
+
+    function showSnackbar(msg) {
+      const sb = document.getElementById("snackbar");
+      sb.textContent = msg;
+      sb.className = "snackbar show";
+      setTimeout(() => sb.classList.remove("show"), 3000);
+    }
+
+    function resetLogin() {
+      clickCounts = {};
+      document.getElementById('previewImage').style.display = 'none';
+      document.getElementById('previewPlaceholder').style.display = 'block';
+      clearTimeout(loginTimer);
+      showSnackbar('Login session expired. Try again.');
+    }
+
+    function showClickEffect(x, y) {
+      const e = document.createElement('div');
+      e.className = 'click-effect';
+      e.style.left = x + 'px';
+      e.style.top = y + 'px';
+      document.body.appendChild(e);
+      setTimeout(() => e.remove(), 600);
+    }
+
+    function startMatrixRain() {
+      const canvas = document.getElementById('matrixCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.style.display = 'block';
+      document.getElementById('successText').style.display = 'block';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+      const fontSize = 20, columns = canvas.width / fontSize;
+      const drops = Array(Math.floor(columns)).fill(1);
+      function draw() {
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0f0';
+        ctx.font = fontSize + 'px monospace';
+        drops.forEach((y, i) => {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * fontSize, y * fontSize);
+          drops[i] = y * fontSize > canvas.height && Math.random() > 0.975 ? 0 : y + 1;
+        });
+      }
+      const animate = () => { draw(); requestAnimationFrame(animate); };
+      animate();
+      setTimeout(() => window.location.href = '/dashboard', 3000);
+    }
+
+    async function tryGeneratePreview() {
+      const username = document.getElementById('username').value;
+      const bgType = document.getElementById('backgroundType').value;
+      if (!username || !bgType) return showSnackbar("Enter username and select background.");
+
+      try {
+        const res1 = await fetch('/api/get-user-objects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        const objData = await res1.json();
+        if (!objData.success) return showSnackbar("User not found.");
+        registeredObjects = objData.objects;
+
+        const res2 = await fetch('/api/generate-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ background_type: bgType, is_registration: false, required_objects: 9 })
+        });
+        const preview = await res2.json();
+        if (!preview.success) return showSnackbar("Preview generation failed.");
+        const img = document.getElementById('previewImage');
+        document.getElementById('previewPlaceholder').style.display = 'none';
+        img.src = preview.image_url + '?' + new Date().getTime();
+        img.style.display = 'block';
+        objectPositions = preview.object_positions;
+        if (loginTimer) clearTimeout(loginTimer);
+        loginTimer = setTimeout(resetLogin, 120000);
+      } catch (e) {
+        console.error(e);
+        showSnackbar("Server error.");
+      }
+    }
+
+    async function checkAuthentication() {
+      const totalRegistered = registeredObjects.reduce((a, b) => a + b.clicks, 0);
+      const totalCurrent = Object.values(clickCounts).reduce((a, b) => a + b, 0);
+      if (totalRegistered !== totalCurrent) return;
+      const valid = registeredObjects.every(o => clickCounts[o.name] === o.clicks);
+      if (!valid) return showSnackbar("Incorrect objects clicked.");
+      try {
+        const username = document.getElementById('username').value;
+        const bg = document.getElementById('backgroundType').value;
+        const clicks = registeredObjects.map(o => ({ name: o.name, clicks: clickCounts[o.name] || 0, image: "" }));
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, background_type: bg, objects: clicks })
+        });
+        const result = await res.json();
+        if (result.success) startMatrixRain();
+        else showSnackbar(result.error || "Login failed.");
+      } catch (err) {
+        console.error(err);
+        showSnackbar("Server error.");
+      }
+    }
+
+    async function checkAdminStatus() {
+      const username = document.getElementById('username').value;
+      const adminLink = document.getElementById('adminLink');
+      if (username && username.toLowerCase() === "admin") {
+        adminLink.classList.remove("hidden");
+      } else {
+        adminLink.classList.add("hidden");
+      }
+    }
+
+    document.getElementById('previewImage').addEventListener('click', async (e) => {
+      const img = e.target;
+      const rect = img.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const scaleX = img.naturalWidth / img.width, scaleY = img.naturalHeight / img.height;
+      const actualX = x * scaleX, actualY = y * scaleY;
+
+      for (const obj of objectPositions) {
+        if (
+          actualX >= obj.x && actualX <= obj.x + obj.width &&
+          actualY >= obj.y && actualY <= obj.y + obj.height
+        ) {
+          clickCounts[obj.name] = (clickCounts[obj.name] || 0) + 1;
+          showClickEffect(e.clientX, e.clientY);
+          await checkAuthentication();
+          break;
+        }
+      }
+    });
+
+    document.getElementById('username').addEventListener('change', () => {
+      tryGeneratePreview();
+      checkAdminStatus();
+    });
+    document.getElementById('backgroundType').addEventListener('change', tryGeneratePreview);
+    document.getElementById('loginForm').addEventListener('submit', e => e.preventDefault());
+
+    window.addEventListener('load', () => {
+      const u = document.getElementById('username').value;
+      const b = document.getElementById('backgroundType').value;
+      if (u && b) {
+        tryGeneratePreview();
+        checkAdminStatus();
+      }
+    });
+  </script>
+</body>
+</html>
+

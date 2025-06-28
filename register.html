@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPOD Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .monochrome-bg {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        .hover-glow:hover {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        .input-monochrome {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .input-monochrome:focus {
+            border-color: white;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom dropdown styling */
+        select.input-monochrome {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em;
+        }
+
+        select.input-monochrome option {
+            background-color: #1a1a1a;
+            color: white;
+            padding: 8px;
+        }
+
+        select.input-monochrome:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+</head>
+<body class="monochrome-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center text-white">GPOD Registration</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: Form -->
+            <div class="glass-panel rounded-lg p-8">
+                <form id="registrationForm" class="space-y-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium mb-2">Username</label>
+                        <input type="text" id="username" name="username" required
+                               class="input-monochrome w-full px-4 py-2 rounded-md focus:outline-none">
+                    </div>
+                    
+                    <div>
+                        <label for="backgroundType" class="block text-sm font-medium mb-2">Background Type</label>
+                        <select name="background_type" id="backgroundType" required 
+                                class="input-monochrome w-full px-4 py-2 rounded-md focus:outline-none">
+                            <option value="">Select a background</option>
+                            <option value="indoor">Indoor</option>
+                            <option value="mountain">Mountain</option>
+                            <option value="outdoor">Outdoor</option>
+                            <option value="sea_cliff">Sea Cliff</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-4">Select Objects (3-5 objects)</label>
+                        <div id="objectList" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto pr-2">
+                            <!-- Objects will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between space-x-4">
+                        <button type="button" onclick="location.href='/login'"
+                                class="px-6 py-2 rounded-md border border-white/30 hover-glow">
+                            Back to Login
+                        </button>
+                        <button type="submit"
+                                class="px-6 py-2 rounded-md bg-white text-black font-medium hover-glow">
+                            Register
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Right Column: Preview -->
+            <div class="glass-panel rounded-lg p-8 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <label class="block text-sm font-medium">Preview</label>
+                    <button id="previewButton" 
+                            class="px-4 py-2 rounded-md border border-white/30 hover-glow">
+                        Generate Preview
+                    </button>
+                </div>
+                <div id="previewContainer" class="flex-grow flex items-center justify-center bg-black/30 rounded-lg min-h-[400px]">
+                    <p id="previewPlaceholder" class="text-white/50">Preview will appear here</p>
+                    <img id="previewImage" class="hidden max-w-full max-h-[400px] object-contain" alt="Preview">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Available objects for selection
+        const availableObjects = [
+            { name: 'aeroplane', maxClicks: 3 },
+            { name: 'bird', maxClicks: 3 },
+            { name: 'cat', maxClicks: 3 },
+            { name: 'clock', maxClicks: 3 },
+            { name: 'dog', maxClicks: 3 },
+            { name: 'food', maxClicks: 3 },
+            { name: 'giraffe', maxClicks: 3 },
+            { name: 'person', maxClicks: 3 },
+            { name: 'zebra', maxClicks: 3 }
+        ];
+        
+        // Populate object selection
+        const objectList = document.getElementById('objectList');
+        availableObjects.forEach(obj => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-3 rounded-md glass-panel';
+            div.innerHTML = `
+                <label class="flex items-center flex-grow">
+                    <input type="checkbox" class="object-checkbox mr-3 w-5 h-5"
+                           data-name="${obj.name}">
+                    <span class="capitalize">${obj.name}</span>
+                </label>
+                <div class="flex items-center space-x-2 ml-4">
+                    <button type="button" class="click-count-btn px-2 py-1 rounded-md border border-white/30 hover-glow"
+                            onclick="updateClicks('${obj.name}', -1)">-</button>
+                    <span id="clicks-${obj.name}" class="w-8 text-center">1</span>
+                    <button type="button" class="click-count-btn px-2 py-1 rounded-md border border-white/30 hover-glow"
+                            onclick="updateClicks('${obj.name}', 1)">+</button>
+                </div>
+            `;
+            objectList.appendChild(div);
+        });
+        
+        // Handle click count updates
+        function updateClicks(objName, delta) {
+            const countSpan = document.getElementById(`clicks-${objName}`);
+            const checkbox = document.querySelector(`input[data-name="${objName}"]`);
+            let count = parseInt(countSpan.textContent);
+            count = Math.max(1, Math.min(3, count + delta));
+            countSpan.textContent = count;
+            checkbox.checked = true;
+            
+            // Trigger preview generation if background is selected
+            const backgroundType = document.getElementById('backgroundType').value;
+            if (backgroundType) {
+                document.getElementById('previewButton').click();
+            }
+        }
+        
+        // Handle preview generation
+        document.getElementById('previewButton').addEventListener('click', async () => {
+            const backgroundType = document.getElementById('backgroundType').value;
+            if (!backgroundType) {
+                alert('Please select a background type');
+                return;
+            }
+            
+            // Get only the selected objects
+            const selectedObjects = Array.from(document.querySelectorAll('.object-checkbox:checked'))
+                .map(checkbox => ({
+                    name: checkbox.dataset.name,
+                    clicks: parseInt(document.getElementById(`clicks-${checkbox.dataset.name}`).textContent)
+                }));
+                
+            if (selectedObjects.length < 3) {
+                alert('Please select at least 3 objects');
+                return;
+            }
+            
+            if (selectedObjects.length > 5) {
+                alert('Please select no more than 5 objects');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/generate-preview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        background_type: backgroundType,
+                        objects: selectedObjects,
+                        is_registration: true  // Add this flag to indicate registration preview
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    const previewImage = document.getElementById('previewImage');
+                    const previewPlaceholder = document.getElementById('previewPlaceholder');
+                    
+                    previewImage.src = result.image_url + '?t=' + new Date().getTime();
+                    previewImage.onload = () => {
+                        previewPlaceholder.classList.add('hidden');
+                        previewImage.classList.remove('hidden');
+                    };
+                } else {
+                    alert(result.error || 'Failed to generate preview');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while generating preview');
+            }
+        });
+        
+        // Auto-generate preview when background type changes
+        document.getElementById('backgroundType').addEventListener('change', () => {
+            const selectedObjects = document.querySelectorAll('.object-checkbox:checked');
+            if (selectedObjects.length >= 3) {
+                document.getElementById('previewButton').click();
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const backgroundType = document.getElementById('backgroundType').value;
+            const selectedObjects = Array.from(document.querySelectorAll('.object-checkbox:checked'))
+                .map(checkbox => ({
+                    name: checkbox.dataset.name,
+                    clicks: parseInt(document.getElementById(`clicks-${checkbox.dataset.name}`).textContent)
+                }));
+                
+            if (selectedObjects.length < 3) {
+                alert('Please select at least 3 objects');
+                return;
+            }
+            
+            if (selectedObjects.length > 5) {
+                alert('Please select no more than 5 objects');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        background_type: backgroundType,
+                        objects: selectedObjects
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Registration successful!');
+                    window.location.href = '/login';
+                } else {
+                    alert(result.error || 'Registration failed');
+                }
+            } catch (error) {
+                alert('An error occurred');
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html> 

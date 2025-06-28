@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPOD System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .matrix-bg {
+            background-color: #000;
+            background-image: radial-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+            background-size: 3px 3px;
+        }
+        
+        .matrix-text {
+            color: #0F0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 5px #0F0;
+        }
+        
+        .glass-panel {
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid #0F0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+        
+        .hover-glow:hover {
+            text-shadow: 0 0 10px #0F0;
+            box-shadow: 0 0 15px #0F0;
+        }
+    </style>
+</head>
+<body class="matrix-bg min-h-screen text-green-500">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Welcome Panel -->
+        <div class="glass-panel rounded-lg p-6 mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold matrix-text">Welcome, {{ users[0].username }}!</h1>
+                <button onclick="location.href='/logout'" 
+                        class="px-4 py-2 rounded border border-green-500 hover-glow">
+                    Logout
+                </button>
+            </div>
+        </div>
+        
+        <!-- User Information Panel -->
+        <div class="glass-panel rounded-lg p-6">
+            <h2 class="text-2xl font-bold matrix-text mb-4">Your Authentication Details</h2>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="font-bold">Background Type:</div>
+                    <div>{{ users[0].background_type }}</div>
+                    
+                    <div class="font-bold">Registered Objects:</div>
+                    <div>
+                        {% for obj in users[0].objects %}
+                            <div class="mb-1">{{ obj.name }} ({{ obj.clicks }} clicks)</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="font-bold">Account Created:</div>
+                    <div>{{ users[0].created_at }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
