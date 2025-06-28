@@ -46,14 +46,14 @@ OpenCV
 
 Installation Steps-
 Clone the repository:
-git clone https://github.com/yourusername/gpod-auth.git
-cd gpod-auth
+git clone https://github.com/gayathrym/gpod.git
+cd gpod
 
 Install the required dependencies:
 pip install -r requirements.txt
 
 Download YOLOv3 weights:
-wget https://pjreddie.com/media/files/yolov3.weights
+wget https://www.kaggle.com/datasets/shivam316/yolov3-weights
 
 Setup Tutorial
 Clone the project and navigate to the directory.
