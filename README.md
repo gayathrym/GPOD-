@@ -34,6 +34,9 @@ OpenCV
 YOLOv3
 
 Tailwind CSS
+![loginpage](https://github.com/user-attachments/assets/736f42ab-b307-41c2-ad5d-0cc92411e32f)
+![challenge generation](https://github.com/user-attachments/assets/37a35dd0-86f8-456b-ad6d-b76e342f3780)
+![successful](https://github.com/user-attachments/assets/04849fe4-827d-46ba-a817-65c5399ba74f)
 
 Prerequisites-
 Python 3.8+
